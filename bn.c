@@ -5,6 +5,35 @@
 #include <unistd.h>
 
 
+enum {
+    MAX_AA_HEIGHT   = 7,
+    MAX_AA_WIDTH    = 29,
+};
+
+
+// 表示用のAA
+static const char* bird[][MAX_AA_HEIGHT] = {
+    {
+        "   .--.                      ",
+        "__/ o  \".                   ",
+        "  |,    \"-._                ",
+        "  |;;,      \"-._            ",
+        "  ';;;,,    \",_ \"=------.  ",
+        "    ':;;;;,,..-``\"-----'\"` ",
+        "       _|_|                  ",
+    },
+    {
+        "   .--.                      ",
+        "__/ ^  \".                   ",
+        "  |,    \"-._                ",
+        "  |;;,      \"-._            ",
+        "  ';;;,,    \",_ \"=-._      ",
+        "    ':;;;;,,..-``\"-._`\"-.  ",
+        "     _/   _\\          `'\"` ",
+    },
+};
+
+
 int main(int argc, char const* argv[]) {
     /* ncurses 初期化 */
     if(initscr() == NULL){
@@ -21,52 +50,34 @@ int main(int argc, char const* argv[]) {
     /* スクロールしない */
     scrollok(stdscr, FALSE);
 
-    const char* bird1[] = {
-        "   .--.                      ",
-        "__/ o  \".                   ",
-        "  |,    \"-._                ",
-        "  |;;,      \"-._            ",
-        "  ';;;,,    \",_ \"=------.  ",
-        "    ':;;;;,,..-``\"-----'\"` ",
-        "       _|_|                  ",
-    };
-
-    const char* bird2[] = {
-        "   .--.                      ",
-        "__/ ^  \".                   ",
-        "  |,    \"-._                ",
-        "  |;;,      \"-._            ",
-        "  ';;;,,    \",_ \"=-._      ",
-        "    ':;;;;,,..-``\"-._`\"-.  ",
-        "     _/   _\\          `'\"` ",
-    };
-
-    const int max_width = 29;
-    const int bird_line_size = sizeof(bird1) / sizeof(char*);
-
-    printw("%d\n", bird_line_size);
-
+    // 基準面
     const int base_line = LINES / 2;
 
-    // 床
+    // 基準面描画
     mvhline(base_line, 0, '^', COLS - 1);
+    refresh();
 
     int cnt = 0;
-    const char** draw = bird1;
+    const char** draw = bird[0];
 
-    for (int x = COLS - max_width - 1; 0 <= x; --x) {
-        mvprintw(1, 0, "%d\n", x);
-        for (int y = 0; y < bird_line_size; ++y) {
-            if (++cnt == 2) {
-                cnt = 0;
-                draw = (draw == bird1) ? (bird2) : (bird1);
-            }
+    // 右から左へ
+    for (int x = COLS - MAX_AA_WIDTH - 1; 0 <= x; --x) {
+        // for debug
+        mvprintw(0, 0, "%d\n", x);
 
-            mvprintw(base_line - bird_line_size + y, x, "%s\n", draw[y]);
+        // 2フレームごとにAAを切り替え
+        if (++cnt == 2) {
+            cnt = 0;
+            draw = (draw == bird[0]) ? (bird[1]) : (bird[0]);
         }
+
+        // AAの上方から描画
+        for (int y = 0; y < MAX_AA_HEIGHT; ++y) {
+            mvprintw(base_line - MAX_AA_HEIGHT + y, x, "%s\n", draw[y]);
+        }
+
         refresh();
-        usleep(100000 * 2); // 0.1s
-        /* usleep(40000); */
+        usleep(100000); // 0.1s
     }
 
     endwin();
