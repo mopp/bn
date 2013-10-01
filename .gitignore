@@ -1,0 +1,7 @@
+# All ignore
+*
+
+# allow files
+!.gitignore
+!README*
+!*.c
