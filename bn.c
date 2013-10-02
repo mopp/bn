@@ -101,6 +101,11 @@ void signal_handler(int sig) {
         return;
     }
 
+    /* 既にendwinは呼ばれたか */
+    if (isendwin()) {
+        return;
+    }
+
     /* 中断されたときでも終了処理を行う */
     endwin();
 }
