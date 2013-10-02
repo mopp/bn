@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ncurses.h>
 #include <unistd.h>
+#include <signal.h>
 
 
 enum {
@@ -34,10 +35,18 @@ static const char* bird[][MAX_AA_HEIGHT] = {
 };
 
 
+void signal_handler(int);
+
+
 int main(int argc, char const* argv[]) {
     /* ncurses 初期化 */
     if(initscr() == NULL){
         fprintf(stderr, "initscr failure\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (SIG_ERR == signal(SIGQUIT, signal_handler)) {
+        fprintf(stderr, "setting signal handler failure\n");
         exit(EXIT_FAILURE);
     }
 
@@ -50,37 +59,48 @@ int main(int argc, char const* argv[]) {
     /* スクロールしない */
     scrollok(stdscr, FALSE);
 
-    // 基準面
+    /* 基準面 */
     const int base_line = LINES / 2;
 
-    // 基準面描画
+    /* 基準面描画 */
     mvhline(base_line, 0, '^', COLS - 1);
     refresh();
 
     int cnt = 0;
     const char** draw = bird[0];
 
-    // 右から左へ
+    /* 右から左へ */
     for (int x = COLS - MAX_AA_WIDTH - 1; 0 <= x; --x) {
-        // for debug
+        /* for debug */
         mvprintw(0, 0, "%d\n", x);
 
-        // 2フレームごとにAAを切り替え
+        /* 2フレームごとにAAを切り替え */
         if (++cnt == 2) {
             cnt = 0;
             draw = (draw == bird[0]) ? (bird[1]) : (bird[0]);
         }
 
-        // AAの上方から描画
+        /* AAの上方から描画 */
         for (int y = 0; y < MAX_AA_HEIGHT; ++y) {
             mvprintw(base_line - MAX_AA_HEIGHT + y, x, "%s\n", draw[y]);
         }
-
         refresh();
+
         usleep(100000); // 0.1s
     }
 
     endwin();
 
     return 0;
+}
+
+
+/* <C-C>押下時に呼ばれる */
+void signal_handler(int sig) {
+    if (sig != SIGINT) {
+        return;
+    }
+
+    /* 中断されたときでも終了処理を行う */
+    endwin();
 }
