@@ -87,6 +87,8 @@ int main(int argc, char const* argv[]) {
     leaveok(stdscr, TRUE);
     /* スクロールしない */
     scrollok(stdscr, FALSE);
+    /* カーソルを非表示に */
+    curs_set(0);
 
     /* 基準面 */
     const int base_line = LINES / 2;
@@ -121,6 +123,8 @@ int main(int argc, char const* argv[]) {
         usleep(100000); // 0.1s
     }
 
+    /* 終了処理 */
+    curs_set(1);
     endwin();
 
     return 0;
@@ -139,5 +143,6 @@ void signal_handler(int sig) {
     }
 
     /* 中断されたときでも終了処理を行う */
+    curs_set(1);
     endwin();
 }
