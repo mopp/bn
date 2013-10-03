@@ -9,3 +9,5 @@ Required: ncurses
 
     clang -std=c11 -lncurses bn.c
 
+# ScreenShot
+![SS](./SS.png)
