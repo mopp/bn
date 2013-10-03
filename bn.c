@@ -8,6 +8,7 @@
 /* 0~255を0~1000に変換する */
 #define CONVERT_RANGE(c) ((int)(((double)c / 255.0) * 1000.0))
 
+
 enum {
     BN_COLOR_BLACK = COLOR_BLACK,
     BN_COLOR_RED,
@@ -22,7 +23,7 @@ enum {
 };
 
 
-// 表示用のAA
+/* 表示用のAA */
 static const char* bird[][MAX_AA_HEIGHT] = {
     {
         "   .--.                      ",
@@ -46,49 +47,12 @@ static const char* bird[][MAX_AA_HEIGHT] = {
 
 
 void signal_handler(int);
+static inline void init_bn(void);
+static inline void quit_bn(void);
 
 
 int main(int argc, char const* argv[]) {
-    /* ncurses 初期化 */
-    if(initscr() == NULL){
-        fprintf(stderr, "initscr failure\n");
-        exit(EXIT_FAILURE);
-    }
-
-    /* 端末が色の使用と変更が可能なら設定 */
-    if (can_change_color()) {
-        start_color();
-
-        /* 色の初期化 */
-        /* 色番号(1 ~ COLORSの間とする) r, g, b, それぞれ0~1000の範囲 */
-        init_color(BN_COLOR_RED,    CONVERT_RANGE(215), CONVERT_RANGE(0),   CONVERT_RANGE(58));
-        init_color(BN_COLOR_GREEN,  CONVERT_RANGE(56),  CONVERT_RANGE(180), CONVERT_RANGE(139));
-        init_color(BN_COLOR_BLUE,   CONVERT_RANGE(44),  CONVERT_RANGE(169), CONVERT_RANGE(225));
-        init_color(BN_COLOR_BLACK,   CONVERT_RANGE(43),  CONVERT_RANGE(43),  CONVERT_RANGE(43));
-
-        /* 前景と背景のペアを作成 */
-        /* 色番号(1 ~ COLOR_PAIRS-1の範囲であること) 前景 背景 */
-        init_pair(BN_COLOR_PAIR_WG, COLOR_WHITE, BN_COLOR_BLACK);
-        init_pair(BN_COLOR_PAIR_BG, BN_COLOR_BLUE, BN_COLOR_BLACK);
-        init_pair(BN_COLOR_PAIR_GG, BN_COLOR_GREEN, BN_COLOR_BLACK);
-    }
-
-    if (SIG_ERR == signal(SIGQUIT, signal_handler)) {
-        fprintf(stderr, "setting signal handler failure\n");
-        endwin();
-        exit(EXIT_FAILURE);
-    }
-
-    /* シグナルを無視する */
-    /* signal(SIGINT, SIG_IGN); */
-    /* キー入力された文字を表示しない */
-    noecho();
-    /* カーソルを表示しない */
-    leaveok(stdscr, TRUE);
-    /* スクロールしない */
-    scrollok(stdscr, FALSE);
-    /* カーソルを非表示に */
-    curs_set(0);
+    init_bn();
 
     /* 基準面 */
     const int base_line = LINES / 2;
@@ -123,15 +87,62 @@ int main(int argc, char const* argv[]) {
         usleep(100000); // 0.1s
     }
 
-    /* 終了処理 */
-    curs_set(1);
-    endwin();
+    quit_bn();
 
     return 0;
 }
 
 
-/* <C-C>押下時に呼ばれる */
+/* 初期化 */
+static inline void init_bn(void) {
+    if (initscr() == NULL){
+        fprintf(stderr, "initscr failure\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /* 端末が色の使用と変更が可能なら設定 */
+    start_color();
+
+    /* 色の初期化 */
+    /* 色番号(1 ~ COLORSの間とする) r, g, b, それぞれ0~1000の範囲 */
+    init_color(BN_COLOR_RED,    CONVERT_RANGE(215), CONVERT_RANGE(0),   CONVERT_RANGE(58));
+    init_color(BN_COLOR_GREEN,  CONVERT_RANGE(56),  CONVERT_RANGE(180), CONVERT_RANGE(139));
+    init_color(BN_COLOR_BLUE,   CONVERT_RANGE(44),  CONVERT_RANGE(169), CONVERT_RANGE(225));
+    init_color(BN_COLOR_BLACK,   CONVERT_RANGE(43),  CONVERT_RANGE(43),  CONVERT_RANGE(43));
+
+    /* 前景と背景のペアを作成 */
+    /* 色番号(1 ~ COLOR_PAIRS-1の範囲であること) 前景 背景 */
+    init_pair(BN_COLOR_PAIR_WG, COLOR_WHITE, BN_COLOR_BLACK);
+    init_pair(BN_COLOR_PAIR_BG, BN_COLOR_BLUE, BN_COLOR_BLACK);
+    init_pair(BN_COLOR_PAIR_GG, BN_COLOR_GREEN, BN_COLOR_BLACK);
+
+    if (SIG_ERR == signal(SIGQUIT, signal_handler)) {
+        fprintf(stderr, "setting signal handler failure\n");
+        endwin();
+        exit(EXIT_FAILURE);
+    }
+
+    /* シグナルを無視する */
+    /* signal(SIGINT, SIG_IGN); */
+    /* キー入力された文字を表示しない */
+    noecho();
+    /* カーソルを表示しない */
+    leaveok(stdscr, TRUE);
+    /* スクロールしない */
+    scrollok(stdscr, FALSE);
+    /* カーソルを非表示に */
+    curs_set(0);
+}
+
+
+/* 終了処理 */
+static inline void quit_bn(void) {
+    curs_set(1);
+    endwin();
+}
+
+
+/* シグナルを受け取った時に呼ばれる */
 void signal_handler(int sig) {
     if (sig != SIGINT) {
         return;
@@ -143,6 +154,5 @@ void signal_handler(int sig) {
     }
 
     /* 中断されたときでも終了処理を行う */
-    curs_set(1);
-    endwin();
+    quit_bn();
 }
