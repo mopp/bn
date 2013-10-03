@@ -5,10 +5,20 @@
 #include <unistd.h>
 #include <signal.h>
 
+/* 0~255を0~1000に変換する */
+#define CONVERT_RANGE(c) ((int)(((double)c / 255.0) * 1000.0))
 
 enum {
-    MAX_AA_HEIGHT   = 7,
-    MAX_AA_WIDTH    = 29,
+    BN_COLOR_BLACK = COLOR_BLACK,
+    BN_COLOR_RED,
+    BN_COLOR_BLUE,
+    BN_COLOR_GREEN,
+    BN_COLOR_PAIR_WG = 1,
+    BN_COLOR_PAIR_BG,
+    BN_COLOR_PAIR_GG,
+    BN_COLOR_PAIR_DEFAULT = BN_COLOR_PAIR_BG,
+    MAX_AA_HEIGHT = 7,
+    MAX_AA_WIDTH = 29,
 };
 
 
@@ -45,8 +55,27 @@ int main(int argc, char const* argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    /* 端末が色の使用と変更が可能なら設定 */
+    if (can_change_color()) {
+        start_color();
+
+        /* 色の初期化 */
+        /* 色番号(1 ~ COLORSの間とする) r, g, b, それぞれ0~1000の範囲 */
+        init_color(BN_COLOR_RED,    CONVERT_RANGE(215), CONVERT_RANGE(0),   CONVERT_RANGE(58));
+        init_color(BN_COLOR_GREEN,  CONVERT_RANGE(56),  CONVERT_RANGE(180), CONVERT_RANGE(139));
+        init_color(BN_COLOR_BLUE,   CONVERT_RANGE(44),  CONVERT_RANGE(169), CONVERT_RANGE(225));
+        init_color(BN_COLOR_BLACK,   CONVERT_RANGE(43),  CONVERT_RANGE(43),  CONVERT_RANGE(43));
+
+        /* 前景と背景のペアを作成 */
+        /* 色番号(1 ~ COLOR_PAIRS-1の範囲であること) 前景 背景 */
+        init_pair(BN_COLOR_PAIR_WG, COLOR_WHITE, BN_COLOR_BLACK);
+        init_pair(BN_COLOR_PAIR_BG, BN_COLOR_BLUE, BN_COLOR_BLACK);
+        init_pair(BN_COLOR_PAIR_GG, BN_COLOR_GREEN, BN_COLOR_BLACK);
+    }
+
     if (SIG_ERR == signal(SIGQUIT, signal_handler)) {
         fprintf(stderr, "setting signal handler failure\n");
+        endwin();
         exit(EXIT_FAILURE);
     }
 
@@ -63,11 +92,14 @@ int main(int argc, char const* argv[]) {
     const int base_line = LINES / 2;
 
     /* 基準面描画 */
+    attrset(COLOR_PAIR(BN_COLOR_PAIR_GG));
     mvhline(base_line, 0, '^', COLS - 1);
     refresh();
 
     int cnt = 0;
     const char** draw = bird[0];
+
+    attrset(COLOR_PAIR(BN_COLOR_PAIR_DEFAULT));
 
     /* 右から左へ */
     for (int x = COLS - MAX_AA_WIDTH - 1; 0 <= x; --x) {
