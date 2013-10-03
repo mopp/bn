@@ -69,9 +69,6 @@ int main(int argc, char const* argv[]) {
 
     /* 右から左へ */
     for (int x = COLS - MAX_AA_WIDTH - 1; 0 <= x; --x) {
-        /* for debug */
-        mvprintw(0, 0, "%d\n", x);
-
         /* 2フレームごとにAAを切り替え */
         if (++cnt == 2) {
             cnt = 0;

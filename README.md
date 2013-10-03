@@ -5,4 +5,5 @@
 Happy Birthday @yutopp !
 
 # Compile
-clang -std=c11 -lncurses bn.c
+Required ncurses
+    clang -std=c11 -lncurses bn.c
