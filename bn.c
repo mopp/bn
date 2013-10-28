@@ -27,7 +27,7 @@ enum {
 static const char* bird[][MAX_AA_HEIGHT] = {
     {
         "   .--.                      ",
-        "__/ o  \".                   ",
+        "__/ ^  \".                   ",
         "  |,    \"-._                ",
         "  |;;,      \"-._            ",
         "  ';;;,,    \",_ \"=------.  ",
@@ -36,7 +36,7 @@ static const char* bird[][MAX_AA_HEIGHT] = {
     },
     {
         "   .--.                      ",
-        "__/ o  \".                   ",
+        "__/ ^  \".                   ",
         "  |,    \"-._                ",
         "  |;;,      \"-._            ",
         "  ';;;,,    \",_ \"=-._      ",
@@ -120,7 +120,7 @@ static inline void init_bn(void) {
     }
 
     /* シグナルを無視する */
-    /* signal(SIGINT, SIG_IGN); */
+    signal(SIGINT, SIG_IGN);
     /* キー入力された文字を表示しない */
     noecho();
     /* カーソルを表示しない */
