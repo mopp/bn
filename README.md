@@ -7,7 +7,7 @@ Happy Birthday @yutopp !
 # Compile
 Required: ncurses
 
-./configure 
+./configure  
 make install
 
 # ScreenShot
