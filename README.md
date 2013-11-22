@@ -4,11 +4,19 @@
 
 Happy Birthday @yutopp !
 
-# Compile
-Required: ncurses
+# Requirement
+- ncurses
 
-./configure  
-make install
+On Ubuntu, Mint
+
+    sudo apt-get install libncurses5-dev 
+
+# Installation
+    mkdir build
+    cd build
+    cmake ../.
+    make
+    sudo make install
 
 # ScreenShot
 ![SS](./SS.png)
