@@ -8,6 +8,7 @@ Happy Birthday @yutopp !
 - ncurses
 
 On Ubuntu, Mint
+
     sudo apt-get install libncurses5-dev 
 
 # Installation
